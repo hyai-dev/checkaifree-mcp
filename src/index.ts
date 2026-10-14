@@ -18,7 +18,8 @@ interface DetectionResponse {
     confidence: "high" | "medium" | "low";
   };
   signals: Array<{
-    type: string;
+    code?: string;
+    label?: string;
     description: string;
     impact: "negative" | "positive" | "neutral";
   }>;
@@ -219,15 +220,18 @@ server.tool(
         verdictLabel = "Likely Authentic Photograph";
       }
 
+      const rawProb = data.result.ai_probability;
+      const probabilityPercent = rawProb <= 1 ? Math.round(rawProb * 100) : Math.round(rawProb);
+
       const signalsList = data.signals && data.signals.length > 0
-        ? data.signals.map((s) => `• [${s.impact.toUpperCase()}] ${s.description}`).join("\n")
+        ? data.signals.map((s) => `• [${s.impact.toUpperCase()}] ${s.label ? `**${s.label}**: ` : ""}${s.description}`).join("\n")
         : "• No definitive metadata anomalies detected.";
 
       const markdown = `
 ### ${verdictEmoji} Check AI Free Detection Result
 
 * **Verdict**: **${verdictLabel}**
-* **AI Probability**: **${data.result.ai_probability}%**
+* **AI Probability**: **${probabilityPercent}%**
 * **Confidence**: **${data.result.confidence.toUpperCase()}**
 * **Image Dimensions**: ${data.meta.width || "N/A"} × ${data.meta.height || "N/A"} (${data.meta.format || "Unknown"})
 
@@ -272,28 +276,37 @@ server.tool(
     try {
       const data = await analyzeImage(args);
 
-      const c2paSignals = data.signals.filter(
-        (s) =>
-          s.type.toLowerCase().includes("c2pa") ||
-          s.type.toLowerCase().includes("provenance") ||
-          s.description.toLowerCase().includes("c2pa") ||
-          s.description.toLowerCase().includes("exif") ||
-          s.description.toLowerCase().includes("camera")
-      );
+      const rawProb = data.result.ai_probability;
+      const probabilityPercent = rawProb <= 1 ? Math.round(rawProb * 100) : Math.round(rawProb);
 
-      const hasC2PA = c2paSignals.some((s) => s.description.toLowerCase().includes("c2pa"));
+      const c2paSignals = (data.signals || []).filter((s) => {
+        const text = `${s.code || ""} ${s.label || ""} ${s.description || ""}`.toLowerCase();
+        return (
+          text.includes("c2pa") ||
+          text.includes("provenance") ||
+          text.includes("exif") ||
+          text.includes("camera") ||
+          text.includes("makernote") ||
+          text.includes("hardware")
+        );
+      });
+
+      const hasC2PA = c2paSignals.some((s) => {
+        const text = `${s.code || ""} ${s.label || ""} ${s.description || ""}`.toLowerCase();
+        return text.includes("c2pa") || text.includes("content credential");
+      });
 
       const markdown = `
 ### 🛡️ C2PA & Provenance Metadata Inspection
 
 * **C2PA Credentials Found**: **${hasC2PA ? "YES (Cryptographic Manifest Detected)" : "NO (No C2PA manifest found)"}**
-* **Overall AI Probability**: **${data.result.ai_probability}%**
+* **Overall AI Probability**: **${probabilityPercent}%**
 * **Primary Verdict**: **${data.result.verdict}**
 
 #### Provenance & Hardware Signals:
 ${
   c2paSignals.length > 0
-    ? c2paSignals.map((s) => `• ${s.description}`).join("\n")
+    ? c2paSignals.map((s) => `• ${s.label ? `**${s.label}**: ` : ""}${s.description}`).join("\n")
     : "• No camera EXIF or C2PA provenance signatures identified."
 }
 
