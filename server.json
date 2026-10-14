@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.checkaifree/ai-image-detector",
+  "title": "Check AI Free — AI Image & C2PA Detector",
+  "description": "Detect AI images (Flux, Midjourney, DALL-E) and verify C2PA Content Credentials in AI agents.",
+  "version": "1.0.0",
+  "websiteUrl": "https://checkaifree.com",
+  "repository": {
+    "source": "github",
+    "url": "https://github.com/hyai-dev/checkaifree-mcp"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "checkaifree-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "checkaifree-mcp",
+  "version": "1.0.0",
+  "description": "Official Model Context Protocol (MCP) server for Check AI Free. Inspect and detect AI-generated images (Flux, Midjourney, DALL-E) and C2PA Content Credentials directly in Claude, Cursor, and AI agents.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "checkaifree-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "server.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-image-detector",
+    "c2pa",
+    "midjourney-detector",
+    "flux-detector",
+    "deepfake-detector",
+    "claude-desktop",
+    "cursor"
+  ],
+  "author": "Check AI Free (https://checkaifree.com)",
+  "license": "MIT",
+  "homepage": "https://checkaifree.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyai-dev/checkaifree-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/hyai-dev/checkaifree-mcp/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
