@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "checkaifree-mcp": "./dist/index.js"
+    "checkaifree-mcp": "dist/index.js"
   },
   "files": [
     "dist",
@@ -35,7 +35,7 @@
   "homepage": "https://checkaifree.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyai-dev/checkaifree-mcp"
+    "url": "git+https://github.com/hyai-dev/checkaifree-mcp.git"
   },
   "bugs": {
     "url": "https://github.com/hyai-dev/checkaifree-mcp/issues"
