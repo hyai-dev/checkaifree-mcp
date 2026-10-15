@@ -1,7 +1,7 @@
 {
   "name": "checkaifree-mcp",
-  "version": "1.0.0",
-  "description": "Official Model Context Protocol (MCP) server for Check AI Free. Inspect and detect AI-generated images (Flux, Midjourney, DALL-E) and C2PA Content Credentials directly in Claude, Cursor, and AI agents.",
+  "version": "1.0.1",
+  "description": "Official Check AI Free MCP adapter: editable image source clues and explained limitations. Uploads selected images for header inspection; does not verify C2PA signatures.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -16,8 +16,9 @@
   "scripts": {
     "build": "tsc",
     "prepare": "tsc",
-    "test": "tsc && node test-runner.mjs",
-    "start": "node dist/index.js"
+    "test": "npm run build && node --test test/*.test.mjs",
+    "start": "node dist/index.js",
+    "test:live": "npm run build && node test-runner.mjs"
   },
   "keywords": [
     "mcp",

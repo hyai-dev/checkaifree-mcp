@@ -1,71 +1,8 @@
-# Check AI Free MCP Server
+# Check AI Free MCP server
 
-[![npm version](https://img.shields.io/npm/v/checkaifree-mcp.svg)](https://www.npmjs.com/package/checkaifree-mcp)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Check AI Free](https://img.shields.io/badge/Web-checkaifree.com-emerald.svg)](https://checkaifree.com)
+Official MCP adapter for [Check AI Free](https://checkaifree.com). It uploads a selected image for source/header inspection and returns editable metadata observations with limitations. It does not verify C2PA signatures, authenticate an origin or identify an exact generator.
 
-Official **Model Context Protocol (MCP)** server for [Check AI Free](https://checkaifree.com) — the 100% free, private in-browser AI image and C2PA provenance detector.
-
-Connects directly to **Claude Desktop**, **Cursor**, **Cline**, **Windsurf**, and any AI agent framework implementing the [Model Context Protocol](https://modelcontextprotocol.io).
-
----
-
-## ✨ Features
-
-* 🤖 **AI Image Detection**: Identifies generative signatures from **Flux 1.1 Pro**, **Midjourney v5/v6**, **DALL·E 3**, **Stable Diffusion XL**, and synthetic facial deepfakes.
-* 🛡️ **C2PA & Provenance Inspection**: Verifies cryptographic C2PA / Content Authenticity Initiative (CAI) manifests and camera hardware EXIF tags.
-* 🔒 **Zero API Keys & Privacy-Preserving**: No API keys, accounts, or paid plans required.
-* 🌐 **Multiple Input Types**: Analyze images by **public web URL**, **local disk path**, or **Base64 string**.
-
----
-
-## 🛠️ Available Tools
-
-### 1. `detect_ai_image`
-Analyzes an image to determine whether it is synthetic/AI-generated or authentic photography.
-
-**Arguments:**
-* `image_url` *(optional, string)*: Direct public HTTP/HTTPS URL of the image.
-* `file_path` *(optional, string)*: Absolute or relative local path to the image (`.jpg`, `.jpeg`, `.png`, `.webp`).
-* `image_base64` *(optional, string)*: Base64-encoded image string.
-
-**Example Response:**
-```markdown
-### 🤖 Check AI Free Detection Result
-
-* **Verdict**: **Likely AI-Generated**
-* **AI Probability**: **94%**
-* **Confidence**: **HIGH**
-* **Image Dimensions**: 1024 × 1024 (image/png)
-
-#### Forensic Evidence & Signals:
-• [NEGATIVE] C2PA manifest contains generative tool identifier: Midjourney v6
-• [NEGATIVE] Discrete spatial frequency analysis detects uniform diffusion noise residuals
-• [NEGATIVE] Missing camera sensor MakerNotes and PRNU photon noise signature
-
----
-Analyzed via Check AI Free — https://checkaifree.com
-```
-
-### 2. `inspect_c2pa_provenance`
-Specifically extracts cryptographic C2PA provenance, signing certificate authorities, and tamper-evident history.
-
-**Arguments:**
-* `image_url` *(optional, string)*: Public URL of the image.
-* `file_path` *(optional, string)*: Local image file path.
-
----
-
-## 🚀 Quick Start & Installation
-
-No installation is needed if using `npx`.
-
-### 1. Claude Desktop Setup
-
-Add the following to your `claude_desktop_config.json`:
-
-* **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-* **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+## Install
 
 ```json
 {
@@ -78,55 +15,33 @@ Add the following to your `claude_desktop_config.json`:
 }
 ```
 
-### 2. Cursor Setup
+Use this stdio configuration in an MCP client that supports local commands. No service API key or account is required; rate limits and availability apply.
 
-In Cursor Settings → Features → MCP:
-1. Click **+ Add New MCP Server**
-2. Name: `checkaifree`
-3. Type: `command`
-4. Command: `npx -y checkaifree-mcp`
+## Tools
 
-### 3. Cline / Windsurf Setup
+- `detect_ai_image`: accepts one of `image_url`, `file_path`, or `image_base64`. Read source observations; metadata-only readings do not display a model percentage.
+- `inspect_c2pa_provenance`: accepts `image_url` or `file_path`. The historical tool name is retained for compatibility. It observes source markers and camera fields; signatures, asset binding and certificate trust are **not verified**.
 
-Add to your `mcpSettings.json`:
-```json
-{
-  "mcpServers": {
-    "checkaifree": {
-      "command": "npx",
-      "args": ["-y", "checkaifree-mcp"]
-    }
-  }
-}
+Supported inputs: JPEG, PNG and WebP up to 10 MiB. A supplied URL is fetched by this Node process; the selected image bytes and filename are then sent to the Check AI Free backend. Local files and base64 input are also uploaded. This adapter is not an in-browser/local-only checker. Do not supply sensitive images without reviewing [image handling](https://checkaifree.com/privacy).
+
+The current adapter calls the source/header endpoint. It does **not** run the website's separate image re-encoding/pixel-model fallback. Missing metadata can therefore remain inconclusive. Use the [website](https://checkaifree.com/) for the full user-facing flow. Source text is editable; no metadata observation or model estimate is proof of authenticity or account identity.
+
+## Reading example
+
+An illustrative source-only response might say:
+
+> Source text suggests AI generation. No completed model score; source clues alone do not establish a probability. Source fields are editable. C2PA signatures are not verified.
+
+This is an explanation of output semantics, not an accuracy benchmark. The [method page](https://checkaifree.com/methodology) documents the product's capabilities and limits.
+
+## Development and release checks
+
+```sh
+npm ci
+npm test
+npm pack --dry-run
 ```
 
----
+The default tests are offline: output semantics, protocol initialization/tool discovery and missing-input rejection. `test:live` retains the legacy integration runner and requires explicit review of its fixtures and network requests before use. Release checks do not need paid provider calls.
 
-## 🧪 Local Development & Build
-
-```bash
-git clone https://github.com/hyai-dev/checkaifree-mcp.git
-cd checkaifree-mcp
-
-# Install dependencies
-npm install
-
-# Build TypeScript to dist/
-npm run build
-
-# Test run locally
-node dist/index.js
-```
-
----
-
-## 📖 Related Links & References
-
-* 🌐 Web Application: [https://checkaifree.com](https://checkaifree.com)
-* 🔬 Forensic Methodology: [https://checkaifree.com/methodology](https://checkaifree.com/methodology)
-* 💼 LinkedIn Profile Picture Checker: [https://checkaifree.com/check/linkedin-profile-picture](https://checkaifree.com/check/linkedin-profile-picture)
-* 🎨 Art Contest Submission Checker: [https://checkaifree.com/check/art-contest-submission](https://checkaifree.com/check/art-contest-submission)
-
-## 📄 License
-
-MIT License. See [LICENSE](LICENSE) for details.
+Source: [hyai-dev/checkaifree-mcp](https://github.com/hyai-dev/checkaifree-mcp). MIT license; see LICENSE.
