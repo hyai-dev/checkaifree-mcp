@@ -4,6 +4,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import { presentReading } from "./presentation.js";
 
 const CHECKAIFREE_API_URL = "https://checkaifree.com/api/v1/detect";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -194,13 +195,13 @@ async function analyzeImage(args: {
 
 const server = new McpServer({
   name: "checkaifree-mcp",
-  version: "1.0.0",
-  description: "Official MCP server for Check AI Free (https://checkaifree.com) — Detect AI-generated images & C2PA credentials",
+  version: "1.0.1",
+  description: "Official MCP server for Check AI Free — editable image source clues, without signature verification",
 });
 
 server.tool(
   "detect_ai_image",
-  "Analyzes an image (via URL, local file path, or base64) to determine whether it is AI-generated (Flux, Midjourney, DALL-E, Stable Diffusion) or authentic photography. Returns probability score, confidence, C2PA status, and forensic signals.",
+  "Uploads a selected image for header/source-clue inspection. Returns editable source observations and limitations, not authenticated origin or exact model attribution. This adapter does not run the website's pixel-model fallback.",
   {
     image_url: z.string().optional().describe("Direct public HTTP/HTTPS URL of the image to analyze"),
     file_path: z.string().optional().describe("Absolute or relative local file path to an image file (JPEG, PNG, WebP)"),
@@ -210,36 +211,25 @@ server.tool(
     try {
       const data = await analyzeImage(args);
 
-      let verdictEmoji = "⚠️";
-      let verdictLabel = "Inconclusive / Mixed Signals";
-      if (data.result.verdict === "ai_likely") {
-        verdictEmoji = "🤖";
-        verdictLabel = "Likely AI-Generated";
-      } else if (data.result.verdict === "human_likely") {
-        verdictEmoji = "📷";
-        verdictLabel = "Likely Authentic Photograph";
-      }
-
-      const rawProb = data.result.ai_probability;
-      const probabilityPercent = rawProb <= 1 ? Math.round(rawProb * 100) : Math.round(rawProb);
+      const view = presentReading(data);
 
       const signalsList = data.signals && data.signals.length > 0
         ? data.signals.map((s) => `• [${s.impact.toUpperCase()}] ${s.label ? `**${s.label}**: ` : ""}${s.description}`).join("\n")
         : "• No definitive metadata anomalies detected.";
 
       const markdown = `
-### ${verdictEmoji} Check AI Free Detection Result
+### Check AI Free source reading
 
-* **Verdict**: **${verdictLabel}**
-* **AI Probability**: **${probabilityPercent}%**
-* **Confidence**: **${data.result.confidence.toUpperCase()}**
+* **Reading**: **${view.label}**
+* **Score**: **${view.score}**
+* **Limit**: Source fields are editable. C2PA signatures are not verified.
 * **Image Dimensions**: ${data.meta.width || "N/A"} × ${data.meta.height || "N/A"} (${data.meta.format || "Unknown"})
 
-#### Forensic Evidence & Signals:
+#### Observed source signals:
 ${signalsList}
 
 ---
-*Analyzed via [Check AI Free](https://checkaifree.com) — 100% Free, Private In-Browser AI & C2PA Image Detector.*
+*Analyzed via [Check AI Free](https://checkaifree.com) — Image source clues and optional model checks; processing and limits are explained on the website.*
 `.trim();
 
       return {
@@ -267,7 +257,7 @@ ${signalsList}
 
 server.tool(
   "inspect_c2pa_provenance",
-  "Inspects cryptographic C2PA / Content Authenticity Initiative (CAI) metadata and camera EXIF credentials to verify tamper-evident digital provenance.",
+  "Observes source strings and camera metadata. Does not verify C2PA signatures, certificate trust or authenticity.",
   {
     image_url: z.string().optional().describe("Direct public URL of the image to inspect for C2PA credentials"),
     file_path: z.string().optional().describe("Local file path to the image on disk"),
@@ -275,9 +265,6 @@ server.tool(
   async (args) => {
     try {
       const data = await analyzeImage(args);
-
-      const rawProb = data.result.ai_probability;
-      const probabilityPercent = rawProb <= 1 ? Math.round(rawProb * 100) : Math.round(rawProb);
 
       const c2paSignals = (data.signals || []).filter((s) => {
         const text = `${s.code || ""} ${s.label || ""} ${s.description || ""}`.toLowerCase();
@@ -299,19 +286,19 @@ server.tool(
       const markdown = `
 ### 🛡️ C2PA & Provenance Metadata Inspection
 
-* **C2PA Credentials Found**: **${hasC2PA ? "YES (Cryptographic Manifest Detected)" : "NO (No C2PA manifest found)"}**
-* **Overall AI Probability**: **${probabilityPercent}%**
+* **C2PA source marker**: **${hasC2PA ? "Observed; signature not verified" : "No source marker observed in the inspected slice"}**
+* **Limit**: **Source clues are editable; no signature verification or model probability is established by provenance text.**
 * **Primary Verdict**: **${data.result.verdict}**
 
 #### Provenance & Hardware Signals:
 ${
   c2paSignals.length > 0
     ? c2paSignals.map((s) => `• ${s.label ? `**${s.label}**: ` : ""}${s.description}`).join("\n")
-    : "• No camera EXIF or C2PA provenance signatures identified."
+    : "• No camera EXIF or C2PA source marker observed in the inspected slice."
 }
 
 ---
-*Verification powered by [Check AI Free](https://checkaifree.com/methodology).*
+*Source observations via [Check AI Free](https://checkaifree.com/methodology); signatures are not verified.*
 `.trim();
 
       return {
