@@ -1,6 +1,7 @@
 {
   "name": "checkaifree-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
+  "mcpName": "com.checkaifree/ai-image-detector",
   "description": "Official Check AI Free MCP adapter: editable image source clues and explained limitations. Uploads selected images for header inspection; does not verify C2PA signatures.",
   "type": "module",
   "main": "dist/index.js",

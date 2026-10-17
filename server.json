@@ -3,7 +3,7 @@
   "name": "com.checkaifree/ai-image-detector",
   "title": "Check AI Free \u2014 Image Source Clues",
   "description": "Inspect editable image source clues. No C2PA signature verification or authenticated origin.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "websiteUrl": "https://checkaifree.com",
   "repository": {
     "source": "github",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "checkaifree-mcp",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "transport": {
         "type": "stdio"
       }

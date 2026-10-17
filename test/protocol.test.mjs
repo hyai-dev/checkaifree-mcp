@@ -7,7 +7,7 @@ test('the packaged server initializes, lists compatible tools and rejects missin
   const transport=new StdioClientTransport({command:process.execPath,args:['dist/index.js'],stderr:'pipe'});
   try {
     await client.connect(transport);
-    assert.equal(client.getServerVersion().version,'1.0.1');
+    assert.equal(client.getServerVersion().version,'1.0.2');
     const listed=await client.listTools();
     assert.deepEqual(listed.tools.map(t=>t.name).sort(),['detect_ai_image','inspect_c2pa_provenance']);
     assert.match(listed.tools.find(t=>t.name==='inspect_c2pa_provenance').description,/Does not verify/);
