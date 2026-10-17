@@ -195,7 +195,7 @@ async function analyzeImage(args: {
 
 const server = new McpServer({
   name: "checkaifree-mcp",
-  version: "1.0.1",
+  version: "1.0.2",
   description: "Official MCP server for Check AI Free — editable image source clues, without signature verification",
 });
 
