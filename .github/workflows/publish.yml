@@ -1,8 +1,8 @@
 name: Publish to npm
 
 # Publishes the package when a GitHub Release is published.
-# Requires a repository secret named NPM_TOKEN (npm automation token with publish access).
-# Provenance is signed with this workflow's GitHub OIDC token (id-token: write).
+# Uses npm trusted publishing configured on npmjs.com for repo hyai-dev/checkaifree-mcp,
+# workflow file publish.yml. No token needed.
 
 on:
   release:
@@ -43,7 +43,11 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Verify npm version
+        run: npm --version
+
       - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
